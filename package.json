@@ -1,0 +1,19 @@
+{
+  "name": "chromastat",
+  "version": "1.0.0",
+  "description": "Experimental gesture-controlled, LED-based thermostat.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aroman/chromastat.git"
+  },
+  "author": "Avi Romanoff <avi@romanoff.me>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/aroman/chromastat/issues"
+  },
+  "homepage": "https://github.com/aroman/chromastat#readme"
+}
