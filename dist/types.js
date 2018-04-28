@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MAX_BRIGHTNESS = 100;
+exports.MAX_BRIGHTNESS = 50; // actual max is 255
 var State;
 (function (State) {
     State["Sleeping"] = "Sleeping";
