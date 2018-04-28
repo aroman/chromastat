@@ -9,7 +9,6 @@ const left_pad_1 = __importDefault(require("left-pad"));
 const types_1 = require("./types");
 const safe_1 = require("colors/safe");
 const ws281x = require('rpi-ws281x-native');
-const MAX_BRIGHTNESS = 255;
 function pixelColorToString(pixelColor) {
     switch (pixelColor) {
         case types_1.PixelColor.Off: return safe_1.bgBlack(' ');
@@ -40,7 +39,7 @@ class Lightstrip extends events_1.EventEmitter {
         return this._brightness;
     }
     set brightness(brightness) {
-        this._brightness = Math.max(0, Math.min(brightness, MAX_BRIGHTNESS));
+        this._brightness = Math.max(0, Math.min(brightness, types_1.MAX_BRIGHTNESS));
         ws281x.setBrightness(brightness);
         this.render();
     }
@@ -68,7 +67,7 @@ class Lightstrip extends events_1.EventEmitter {
         for (let i = 0; i < this.numLights; i++) {
             s += pixelColorToString(this.pixelData[i]);
         }
-        const scaledBrightness = Math.round((this.brightness / MAX_BRIGHTNESS) * 100);
+        const scaledBrightness = Math.round((this.brightness / types_1.MAX_BRIGHTNESS) * 100);
         return `[🔆 ${left_pad_1.default(scaledBrightness, 3)}%] ${s}`;
     }
     setPixelColorAt(index, pixel) {

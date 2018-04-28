@@ -1,4 +1,4 @@
-import { State, Action, PixelColor } from './types';
+import { State, Action, PixelColor, MAX_BRIGHTNESS } from './types';
 import Lightstrip from './Lightstrip';
 import _ from 'lodash';
 import { EventEmitter } from 'events';
@@ -67,11 +67,11 @@ export default class Thermostat extends EventEmitter {
             this.currentTemperature = Math.max(this.minTemperature, this.currentTemperature - 1);
 
         } else if (action.name === 'increase-brightness') {
-            this.lightstrip.brightness += 2.55
+            this.lightstrip.brightness += .01 * MAX_BRIGHTNESS
         } else if (action.name === 'decrease-brightness') {
-            this.lightstrip.brightness -= 2.55
+            this.lightstrip.brightness -= .01 * MAX_BRIGHTNESS
         } else if (action.name === 'dim') {
-            this.lightstrip.brightness = .3 * 255
+            this.lightstrip.brightness = .3 * MAX_BRIGHTNESS
         } else if (action.name === 'confirm') {
             this.lightstrip.blink(3)
         }

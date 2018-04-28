@@ -57,13 +57,13 @@ class Thermostat extends events_1.EventEmitter {
             this.currentTemperature = Math.max(this.minTemperature, this.currentTemperature - 1);
         }
         else if (action.name === 'increase-brightness') {
-            this.lightstrip.brightness += 2.55;
+            this.lightstrip.brightness += .01 * types_1.MAX_BRIGHTNESS;
         }
         else if (action.name === 'decrease-brightness') {
-            this.lightstrip.brightness -= 2.55;
+            this.lightstrip.brightness -= .01 * types_1.MAX_BRIGHTNESS;
         }
         else if (action.name === 'dim') {
-            this.lightstrip.brightness = .3 * 255;
+            this.lightstrip.brightness = .3 * types_1.MAX_BRIGHTNESS;
         }
         else if (action.name === 'confirm') {
             this.lightstrip.blink(3);
@@ -72,28 +72,24 @@ class Thermostat extends events_1.EventEmitter {
         this.drawAllColorPixels();
     }
     animationFrame() {
+        // Don't animate if sleeping
         if (this.state === types_1.State.Sleeping) {
             return;
         }
+        // Delta = how many degrees we are away from the desired temperature
+        // e.g: current = 70, desired = 73 -> delta = 3
+        // e.g: current = 80, desired = 75 -> delta = -5
         const delta = this.desiredTemperature - this.currentTemperature;
+        // If we're already at the desired temperature, nothing to animate
         if (delta === 0)
             return;
         this.animationPixelOffset += 1;
         this.animationPixelOffset %= delta;
-        // console.log(`delta: ${delta}, animationPixelOffset: ${this.animationPixelOffset}`)
         this.drawAllColorPixels();
         lodash_1.default.times(this.animationPixelOffset + 1, offset => {
             const indexToAnimate = this.currentTemperature + Math.sign(delta) * offset - this.minTemperature;
-            // console.log(`offset: ${offset}, pixel: ${pixelToAnimate}`)
             this.lightstrip.setPixelColorAt(indexToAnimate, types_1.PixelColor.Green);
         });
-        // _.range(this.currentTemperature - this.minTemperature, this.desiredTemperature - this.minTemperature, Math.sign(delta)).forEach(index => {
-        //     if (index < this.animationPixelOffset) {
-        //         const pixelToAnimate = this.currentTemperature - this.minTemperature + index
-        //         console.log(`pixelToAnimate: ${pixelToAnimate}`)
-        //         // console.log(`index: ${index}, offsetIndex: ${this.currentTemperature - this.minTemperature + index}`)
-        //     }
-        // })
     }
     chartColorForIndex(index) {
         if (index + this.minTemperature === this.desiredTemperature) {

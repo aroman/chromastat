@@ -1,12 +1,10 @@
 import { EventEmitter } from 'events';
 import _ from "lodash";
 import leftPad from 'left-pad';
-import { PixelColor } from "./types";
+import { PixelColor, MAX_BRIGHTNESS } from "./types";
 import { bgBlue, bgCyan, bgGreen, bgYellow, bgRed, bgBlack } from 'colors/safe';
 
 const ws281x = require('rpi-ws281x-native');
-
-const MAX_BRIGHTNESS = 100
 
 export function pixelColorToString(pixelColor: PixelColor) {
     switch (pixelColor) {

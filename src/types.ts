@@ -1,3 +1,5 @@
+export const MAX_BRIGHTNESS = 100
+
 export enum State {
     Sleeping = 'Sleeping',
     Adjusted = 'Adjusted',
