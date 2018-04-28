@@ -27,7 +27,7 @@ export default class Lightstrip extends EventEmitter {
         super()
         console.log(`[Lightstrip] created with ${numLights} lights `)
         this.pixelData = new Uint32Array(this.numLights);
-        const initialBrightness = 255
+        const initialBrightness = 0
         this._brightness = initialBrightness
         ws281x.init(this.numLights, {
             // Use BCM Pin 18 (Pin #12, PWM0)

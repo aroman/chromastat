@@ -12,6 +12,8 @@ class Thermostat extends events_1.EventEmitter {
         super();
         this.minTemperature = 60;
         this.maxTemperature = 90;
+        this.animationDelay = 750; // milliseconds
+        this.animationPixelOffset = 0;
         const numLights = this.maxTemperature - this.minTemperature;
         this.lightstrip = new Lightstrip_1.default(numLights);
         this.reset();
@@ -32,11 +34,15 @@ class Thermostat extends events_1.EventEmitter {
         if (action.name === 'sleep') {
             this.state = types_1.State.Sleeping;
             this.lightstrip.pixels = [];
+            this.lightstrip.brightness = 0;
             return;
         }
         if (action.name !== 'wake' && this.state === types_1.State.Sleeping) {
             console.log('thermostat is sleeping, you need to wake it up first!');
             return;
+        }
+        if (action.name === 'wake') {
+            this.lightstrip.brightness = 255;
         }
         else if (action.name === 'increase-desired') {
             this.desiredTemperature = Math.min(this.maxTemperature, this.desiredTemperature + 1);
@@ -63,27 +69,58 @@ class Thermostat extends events_1.EventEmitter {
             this.lightstrip.blink(3);
         }
         this.state = this.isAdjusted ? types_1.State.Adjusted : types_1.State.Adjusting;
-        this.drawActiveState();
+        this.drawAllColorPixels();
     }
-    drawActiveState() {
+    animationFrame() {
+        if (this.state === types_1.State.Sleeping) {
+            return;
+        }
+        const delta = this.desiredTemperature - this.currentTemperature;
+        if (delta === 0)
+            return;
+        this.animationPixelOffset += 1;
+        this.animationPixelOffset %= delta;
+        // console.log(`delta: ${delta}, animationPixelOffset: ${this.animationPixelOffset}`)
+        this.drawAllColorPixels();
+        lodash_1.default.times(this.animationPixelOffset + 1, offset => {
+            const indexToAnimate = this.currentTemperature + Math.sign(delta) * offset - this.minTemperature;
+            // console.log(`offset: ${offset}, pixel: ${pixelToAnimate}`)
+            this.lightstrip.setPixelColorAt(indexToAnimate, types_1.PixelColor.Green);
+        });
+        // _.range(this.currentTemperature - this.minTemperature, this.desiredTemperature - this.minTemperature, Math.sign(delta)).forEach(index => {
+        //     if (index < this.animationPixelOffset) {
+        //         const pixelToAnimate = this.currentTemperature - this.minTemperature + index
+        //         console.log(`pixelToAnimate: ${pixelToAnimate}`)
+        //         // console.log(`index: ${index}, offsetIndex: ${this.currentTemperature - this.minTemperature + index}`)
+        //     }
+        // })
+    }
+    chartColorForIndex(index) {
+        if (index + this.minTemperature === this.desiredTemperature) {
+            return types_1.PixelColor.Green;
+        }
+        else if (index < this.lightstrip.numLights * 1 / 4) {
+            return types_1.PixelColor.DarkBlue;
+        }
+        else if (index < this.lightstrip.numLights * 2 / 4) {
+            return types_1.PixelColor.LightBlue;
+        }
+        else if (index < this.lightstrip.numLights * 3 / 4) {
+            return types_1.PixelColor.Yellow;
+        }
+        else if (index < this.lightstrip.numLights) {
+            return types_1.PixelColor.Red;
+        }
+    }
+    drawAllColorPixels() {
         this.lightstrip.pixels = lodash_1.default.times(this.lightstrip.numLights, index => {
-            if (index + this.minTemperature === this.desiredTemperature) {
-                return types_1.PixelColor.Green;
-            }
-            else if (index + this.minTemperature > this.currentTemperature) {
+            const indexIsAboveCurrentTemperature = index + this.minTemperature > this.currentTemperature;
+            const indexIsDesiredTemperature = index + this.minTemperature === this.desiredTemperature;
+            if (indexIsAboveCurrentTemperature && !indexIsDesiredTemperature) {
                 return types_1.PixelColor.Off;
             }
-            else if (index < this.lightstrip.numLights * 1 / 4) {
-                return types_1.PixelColor.DarkBlue;
-            }
-            else if (index < this.lightstrip.numLights * 2 / 4) {
-                return types_1.PixelColor.LightBlue;
-            }
-            else if (index < this.lightstrip.numLights * 3 / 4) {
-                return types_1.PixelColor.Yellow;
-            }
-            else if (index < this.lightstrip.numLights) {
-                return types_1.PixelColor.Red;
+            else {
+                return this.chartColorForIndex(index);
             }
         });
     }
@@ -91,6 +128,8 @@ class Thermostat extends events_1.EventEmitter {
         this.currentTemperature = this.minTemperature + (this.maxTemperature - this.minTemperature) / 2;
         this.desiredTemperature = this.currentTemperature;
         this.state = types_1.State.Sleeping;
+        clearTimeout(this.animationTimer);
+        this.animationTimer = setInterval(this.animationFrame.bind(this), this.animationDelay);
         this.emit('change');
     }
 }
