@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as readline from 'readline';
 import { bold, rainbow, underline } from 'colors/safe';
-import { Action, State } from './types';
+import { Action, State, PixelColor } from './types';
 import Thermostat from './Thermostat';
 
 const actions: Action[] = [
@@ -41,9 +41,24 @@ const actions: Action[] = [
         description: 'confirm action',
     },
     {
+        keyName: 'k',
+        name: 'increase-brightness',
+        description: 'increase LED strip brightness',
+    },
+    {
+        keyName: 'j',
+        name: 'decrease-brightness',
+        description: 'decrease LED strip brightness',
+    },
+    {
         keyName: 'd',
         name: 'dim',
         description: 'dim display to 30%',
+    },
+    {
+        keyName: 'r',
+        name: 'reset',
+        description: 'reset',
     },
 ]
 
@@ -61,17 +76,28 @@ process.stdin.on('keypress', (str, key) => {
     if (action) {
         thermostat.performAction(action);
     } else {
-        readline.cursorTo(process.stdout, 0);
-        process.stdout.write(`unknown keypress: ${key.name}`)
+        redraw()
+        process.stdout.write(`\nUnknown keypress: ${key.name}`)
     }
 });
 
 thermostat.on('change', () => {
-    console.log(String(thermostat));
-});
-
-console.log(underline(rainbow('Chromastat 1.0')))
-actions.forEach(({ keyName, description }) => {
-    console.log(`Press ${bold(keyName)} to ${bold(description)}`);
+    redraw()
 })
-console.log(String(thermostat));
+
+function redraw() {
+    // clear screen
+    process.stdout.write('\x1B[2J\x1B[0f');
+
+    // display help/instructions
+    console.log(underline(rainbow('Chromastat 1.0')))
+    actions.forEach(({ keyName, description }) => {
+        console.log(`Press ${bold(keyName)} to ${bold(description)}`);
+    })
+
+    // visualize thermostat state
+    console.log()
+    console.log(String(thermostat));
+}
+
+redraw();

@@ -50,9 +50,24 @@ const actions = [
         description: 'confirm action',
     },
     {
+        keyName: 'k',
+        name: 'increase-brightness',
+        description: 'increase LED strip brightness',
+    },
+    {
+        keyName: 'j',
+        name: 'decrease-brightness',
+        description: 'decrease LED strip brightness',
+    },
+    {
         keyName: 'd',
         name: 'dim',
         description: 'dim display to 30%',
+    },
+    {
+        keyName: 'r',
+        name: 'reset',
+        description: 'reset',
     },
 ];
 const thermostat = new Thermostat_1.default();
@@ -67,16 +82,24 @@ process.stdin.on('keypress', (str, key) => {
         thermostat.performAction(action);
     }
     else {
-        readline.cursorTo(process.stdout, 0);
-        process.stdout.write(`unknown keypress: ${key.name}`);
+        redraw();
+        process.stdout.write(`\nUnknown keypress: ${key.name}`);
     }
 });
 thermostat.on('change', () => {
+    redraw();
+});
+function redraw() {
+    // clear screen
+    process.stdout.write('\x1B[2J\x1B[0f');
+    // display help/instructions
+    console.log(safe_1.underline(safe_1.rainbow('Chromastat 1.0')));
+    actions.forEach(({ keyName, description }) => {
+        console.log(`Press ${safe_1.bold(keyName)} to ${safe_1.bold(description)}`);
+    });
+    // visualize thermostat state
+    console.log();
     console.log(String(thermostat));
-});
-console.log(safe_1.underline(safe_1.rainbow('Chromastat 1.0')));
-actions.forEach(({ keyName, description }) => {
-    console.log(`Press ${safe_1.bold(keyName)} to ${safe_1.bold(description)}`);
-});
-console.log(String(thermostat));
+}
+redraw();
 //# sourceMappingURL=index.js.map

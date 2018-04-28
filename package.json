@@ -19,6 +19,7 @@
   "homepage": "https://github.com/aroman/chromastat#readme",
   "dependencies": {
     "colors": "^1.2.1",
+    "left-pad": "^1.3.0",
     "lodash": "^4.17.10",
     "prompt": "^1.0.0",
     "rpi-ws281x-native": "^0.8.2",
