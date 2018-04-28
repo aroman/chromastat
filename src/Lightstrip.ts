@@ -6,7 +6,7 @@ import { bgBlue, bgCyan, bgGreen, bgYellow, bgRed, bgBlack } from 'colors/safe';
 
 const ws281x = require('rpi-ws281x-native');
 
-const MAX_BRIGHTNESS = 255
+const MAX_BRIGHTNESS = 100
 
 export function pixelColorToString(pixelColor: PixelColor) {
     switch (pixelColor) {
