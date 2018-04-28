@@ -1,6 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MAX_BRIGHTNESS = 50; // actual max is 255
+var Brightness;
+(function (Brightness) {
+    Brightness[Brightness["OFF"] = 0] = "OFF";
+    Brightness[Brightness["LOW"] = 12.75] = "LOW";
+    Brightness[Brightness["NORMAL"] = 25.5] = "NORMAL";
+    Brightness[Brightness["HIGH"] = 38.25] = "HIGH";
+    Brightness[Brightness["MAX"] = 255] = "MAX";
+})(Brightness = exports.Brightness || (exports.Brightness = {}));
 var State;
 (function (State) {
     State["Sleeping"] = "Sleeping";
@@ -10,11 +17,11 @@ var State;
 var PixelColor;
 (function (PixelColor) {
     PixelColor[PixelColor["Off"] = 0] = "Off";
-    PixelColor[PixelColor["LightBlue"] = 65535] = "LightBlue";
-    PixelColor[PixelColor["DarkBlue"] = 255] = "DarkBlue";
+    PixelColor[PixelColor["Blue"] = 40958] = "Blue";
     PixelColor[PixelColor["White"] = 16777215] = "White";
     PixelColor[PixelColor["Green"] = 65280] = "Green";
-    PixelColor[PixelColor["Yellow"] = 16776960] = "Yellow";
+    PixelColor[PixelColor["Orange"] = 16752384] = "Orange";
+    PixelColor[PixelColor["Yellow"] = 16765700] = "Yellow";
     PixelColor[PixelColor["Red"] = 16711680] = "Red";
 })(PixelColor = exports.PixelColor || (exports.PixelColor = {}));
 //# sourceMappingURL=types.js.map

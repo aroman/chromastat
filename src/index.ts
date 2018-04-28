@@ -87,7 +87,7 @@ thermostat.on('change', () => {
 
 function redraw() {
     // clear screen
-    // process.stdout.write('\x1B[2J\x1B[0f');
+    process.stdout.write('\x1B[2J\x1B[0f');
 
 
     // visualize thermostat state

@@ -1,16 +1,16 @@
 import { EventEmitter } from 'events';
 import _ from "lodash";
 import leftPad from 'left-pad';
-import { PixelColor, MAX_BRIGHTNESS } from "./types";
-import { bgBlue, bgCyan, bgGreen, bgYellow, bgRed, bgBlack } from 'colors/safe';
+import { PixelColor, Brightness } from "./types";
+import { bgBlue, bgMagenta, bgGreen, bgYellow, bgRed, bgBlack } from 'colors/safe';
 
 const ws281x = require('rpi-ws281x-native');
 
 export function pixelColorToString(pixelColor: PixelColor) {
     switch (pixelColor) {
         case PixelColor.Off: return bgBlack(' ')
-        case PixelColor.DarkBlue: return bgBlue(' ')
-        case PixelColor.LightBlue: return bgCyan(' ')
+        case PixelColor.Blue: return bgBlue(' ')
+        case PixelColor.Orange: return bgMagenta(' ')
         case PixelColor.Green: return bgGreen(' ')
         case PixelColor.Yellow: return bgYellow(' ')
         case PixelColor.Red: return bgRed(' ')
@@ -40,25 +40,9 @@ export default class Lightstrip extends EventEmitter {
     }
 
     public set brightness(brightness: number) {
-        this._brightness = Math.max(0, Math.min(brightness, MAX_BRIGHTNESS))
+        this._brightness = Math.max(0, Math.min(brightness, Brightness.MAX))
         ws281x.setBrightness(brightness)
         this.render()
-    }
-
-    public blink(times: number) {
-        const previousPixelData = _.cloneDeep(this.pixelData)
-        this.pixels = []
-        _.times(times * 2, i => {
-            console.log(i * 750)
-            setTimeout(() => {
-                if (i % 2 === 0) {
-                    this.pixels = []
-                } else {
-                    this.pixelData = _.cloneDeep(previousPixelData)
-                    this.render()
-                }
-            }, i * 750)
-        })
     }
 
     public teardown(): void {
@@ -70,8 +54,8 @@ export default class Lightstrip extends EventEmitter {
         for (let i = 0; i < this.numLights; i++) {
             s += pixelColorToString(this.pixelData[i])
         }
-        const scaledBrightness = Math.round((this.brightness / MAX_BRIGHTNESS) * 100)
-        return `[🔆 ${leftPad(scaledBrightness, 3)}%] ${s}`
+        // const scaledBrightness = Math.round((this.brightness / MAX_BRIGHTNESS) * 100)
+        return `[🔆 ${leftPad(Math.round(this.brightness), 3)}/255] ${s}`
     }
 
     public setPixelColorAt(index: number, pixel: PixelColor) {

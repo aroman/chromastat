@@ -1,10 +1,10 @@
-import { State, Action, PixelColor, MAX_BRIGHTNESS } from './types';
+import { State, Action, PixelColor, Brightness } from './types';
 import Lightstrip from './Lightstrip';
 import _ from 'lodash';
 import { EventEmitter } from 'events';
 
 export default class Thermostat extends EventEmitter {
-    public readonly minTemperature = 60
+    public readonly minTemperature = 50
     public readonly maxTemperature = 90
 
     public currentTemperature: number
@@ -43,9 +43,9 @@ export default class Thermostat extends EventEmitter {
         }
 
         if (action.name === 'sleep') {
-            this.state = State.Sleeping;
-            this.lightstrip.pixels = [];
-            this.lightstrip.brightness = 0
+            this.state = State.Sleeping
+            this.lightstrip.pixels = []
+            this.lightstrip.brightness = Brightness.OFF
             return
         }
 
@@ -55,7 +55,7 @@ export default class Thermostat extends EventEmitter {
         }
 
         if (action.name === 'wake') {
-            this.lightstrip.brightness = MAX_BRIGHTNESS
+            this.lightstrip.brightness = Brightness.NORMAL
         }
         else if (action.name === 'increase-desired') {
             this.desiredTemperature = Math.min(this.maxTemperature, this.desiredTemperature + 1);
@@ -67,13 +67,22 @@ export default class Thermostat extends EventEmitter {
             this.currentTemperature = Math.max(this.minTemperature, this.currentTemperature - 1);
 
         } else if (action.name === 'increase-brightness') {
-            this.lightstrip.brightness += .01 * MAX_BRIGHTNESS
+            this.lightstrip.brightness += .01 * Brightness.MAX
         } else if (action.name === 'decrease-brightness') {
-            this.lightstrip.brightness -= .01 * MAX_BRIGHTNESS
+            this.lightstrip.brightness -= .01 * Brightness.MAX
         } else if (action.name === 'dim') {
-            this.lightstrip.brightness = .3 * MAX_BRIGHTNESS
+            this.lightstrip.brightness = Brightness.LOW
         } else if (action.name === 'confirm') {
-            this.lightstrip.blink(3)
+            this.lightstrip.brightness = Brightness.LOW
+            setTimeout(() => {
+                this.lightstrip.brightness = Brightness.NORMAL
+            }, 500)
+            setTimeout(() => {
+                this.lightstrip.brightness = Brightness.LOW
+            }, 1000)
+            setTimeout(() => {
+                this.lightstrip.brightness = Brightness.NORMAL
+            }, 1500)
         }
 
         this.state = this.isAdjusted ? State.Adjusted : State.Adjusting;
@@ -101,22 +110,23 @@ export default class Thermostat extends EventEmitter {
 
         _.times(this.animationPixelOffset + 1, offset => {
             const indexToAnimate = this.currentTemperature + Math.sign(delta) * offset - this.minTemperature
-            this.lightstrip.setPixelColorAt(indexToAnimate, PixelColor.Green)
+            this.lightstrip.setPixelColorAt(indexToAnimate, delta < 0 ? PixelColor.Off : this.chartColorForIndex(indexToAnimate))
+            console.log(`delta: ${delta}, indexToAnimate: ${indexToAnimate}`)
         })
     }
 
     private chartColorForIndex(index: number): PixelColor {
-        if (index + this.minTemperature === this.desiredTemperature) {
-            return PixelColor.Green
-        }
-        else if (index < this.lightstrip.numLights * 1 / 4) {
-            return PixelColor.DarkBlue;
+        // if (index + this.minTemperature === this.desiredTemperature) {
+        //     return PixelColor.Green
+        // }
+        if (index < this.lightstrip.numLights * 1 / 4) {
+            return PixelColor.Blue;
         }
         else if (index < this.lightstrip.numLights * 2 / 4) {
-            return PixelColor.LightBlue;
+            return PixelColor.Yellow;
         }
         else if (index < this.lightstrip.numLights * 3 / 4) {
-            return PixelColor.Yellow;
+            return PixelColor.Orange;
         }
         else if (index < this.lightstrip.numLights) {
             return PixelColor.Red;
@@ -126,8 +136,8 @@ export default class Thermostat extends EventEmitter {
     private drawAllColorPixels(): void {
         this.lightstrip.pixels = _.times(this.lightstrip.numLights, index => {
             const indexIsAboveCurrentTemperature = index + this.minTemperature > this.currentTemperature
-            const indexIsDesiredTemperature = index + this.minTemperature === this.desiredTemperature
-            if (indexIsAboveCurrentTemperature && !indexIsDesiredTemperature) {
+            // const indexIsAboveDesiredTemperature = index + this.minTemperature > this.desiredTemperature
+            if (indexIsAboveCurrentTemperature) {
                 return PixelColor.Off
             } else {
                 return this.chartColorForIndex(index)
@@ -137,11 +147,15 @@ export default class Thermostat extends EventEmitter {
 
     private reset() {
         this.currentTemperature = this.minTemperature + (this.maxTemperature - this.minTemperature) / 2;
+        // this.currentTemperature = this.maxTemperature;
         this.desiredTemperature = this.currentTemperature;
         this.state = State.Sleeping;
+        this.lightstrip.pixels = [];
+        this.lightstrip.brightness = 0
         clearTimeout(this.animationTimer)
         this.animationTimer = setInterval(this.animationFrame.bind(this), this.animationDelay)
         this.emit('change')
+
     }
 
 }
