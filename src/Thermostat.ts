@@ -55,7 +55,7 @@ export default class Thermostat extends EventEmitter {
         }
 
         if (action.name === 'wake') {
-            this.lightstrip.brightness = 255
+            this.lightstrip.brightness = MAX_BRIGHTNESS
         }
         else if (action.name === 'increase-desired') {
             this.desiredTemperature = Math.min(this.maxTemperature, this.desiredTemperature + 1);
