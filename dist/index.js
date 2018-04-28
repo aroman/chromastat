@@ -91,15 +91,15 @@ thermostat.on('change', () => {
 });
 function redraw() {
     // clear screen
-    process.stdout.write('\x1B[2J\x1B[0f');
-    // display help/instructions
-    console.log(safe_1.underline(safe_1.rainbow('Chromastat 1.0')));
-    actions.forEach(({ keyName, description }) => {
-        console.log(`Press ${safe_1.bold(keyName)} to ${safe_1.bold(description)}`);
-    });
+    // process.stdout.write('\x1B[2J\x1B[0f');
     // visualize thermostat state
     console.log();
     console.log(String(thermostat));
 }
 redraw();
+// display help/instructions
+console.log(safe_1.underline(safe_1.rainbow('Chromastat 1.0')));
+actions.forEach(({ keyName, description }) => {
+    console.log(`Press ${safe_1.bold(keyName)} to ${safe_1.bold(description)}`);
+});
 //# sourceMappingURL=index.js.map

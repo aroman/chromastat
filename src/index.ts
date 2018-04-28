@@ -87,13 +87,8 @@ thermostat.on('change', () => {
 
 function redraw() {
     // clear screen
-    process.stdout.write('\x1B[2J\x1B[0f');
+    // process.stdout.write('\x1B[2J\x1B[0f');
 
-    // display help/instructions
-    console.log(underline(rainbow('Chromastat 1.0')))
-    actions.forEach(({ keyName, description }) => {
-        console.log(`Press ${bold(keyName)} to ${bold(description)}`);
-    })
 
     // visualize thermostat state
     console.log()
@@ -101,3 +96,9 @@ function redraw() {
 }
 
 redraw();
+
+// display help/instructions
+console.log(underline(rainbow('Chromastat 1.0')))
+actions.forEach(({ keyName, description }) => {
+    console.log(`Press ${bold(keyName)} to ${bold(description)}`);
+})
