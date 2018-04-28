@@ -24,14 +24,19 @@ class Thermostat extends events_1.EventEmitter {
         return `Thermostat<${this.state}, temp = ${this.currentTemperature}, desiredTemp = ${this.desiredTemperature}>\n${this.lightstrip.toString()}`;
     }
     performAction(action) {
-        console.log(`performing action: ${action.description}`);
+        // console.log(`performing action: ${action.description}`)
+        if (action.name === 'reset') {
+            this.reset();
+            return;
+        }
         if (action.name === 'sleep') {
             this.state = types_1.State.Sleeping;
             this.lightstrip.pixels = [];
             return;
         }
-        if (action.name === 'wake') {
-            // pass
+        if (action.name !== 'wake' && this.state === types_1.State.Sleeping) {
+            console.log('thermostat is sleeping, you need to wake it up first!');
+            return;
         }
         else if (action.name === 'increase-desired') {
             this.desiredTemperature = Math.min(this.maxTemperature, this.desiredTemperature + 1);
@@ -44,9 +49,6 @@ class Thermostat extends events_1.EventEmitter {
         }
         else if (action.name === 'decrease-current') {
             this.currentTemperature = Math.max(this.minTemperature, this.currentTemperature - 1);
-        }
-        else if (action.name === 'reset') {
-            this.reset();
         }
         else if (action.name === 'increase-brightness') {
             this.lightstrip.brightness += 2.55;
@@ -89,6 +91,7 @@ class Thermostat extends events_1.EventEmitter {
         this.currentTemperature = this.minTemperature + (this.maxTemperature - this.minTemperature) / 2;
         this.desiredTemperature = this.currentTemperature;
         this.state = types_1.State.Sleeping;
+        this.emit('change');
     }
 }
 exports.default = Thermostat;

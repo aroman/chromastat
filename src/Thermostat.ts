@@ -30,7 +30,12 @@ export default class Thermostat extends EventEmitter {
     }
 
     public performAction(action: Action) {
-        console.log(`performing action: ${action.description}`)
+        // console.log(`performing action: ${action.description}`)
+
+        if (action.name === 'reset') {
+            this.reset()
+            return
+        }
 
         if (action.name === 'sleep') {
             this.state = State.Sleeping;
@@ -38,9 +43,12 @@ export default class Thermostat extends EventEmitter {
             return
         }
 
-        if (action.name === 'wake') {
-            // pass
-        } else if (action.name === 'increase-desired') {
+        if (action.name !== 'wake' && this.state === State.Sleeping) {
+            console.log('thermostat is sleeping, you need to wake it up first!')
+            return
+        }
+
+        else if (action.name === 'increase-desired') {
             this.desiredTemperature = Math.min(this.maxTemperature, this.desiredTemperature + 1);
         } else if (action.name === 'decrease-desired') {
             this.desiredTemperature = Math.max(this.minTemperature, this.desiredTemperature - 1);
@@ -48,8 +56,7 @@ export default class Thermostat extends EventEmitter {
             this.currentTemperature = Math.min(this.maxTemperature, this.currentTemperature + 1);
         } else if (action.name === 'decrease-current') {
             this.currentTemperature = Math.max(this.minTemperature, this.currentTemperature - 1);
-        } else if (action.name === 'reset') {
-            this.reset()
+
         } else if (action.name === 'increase-brightness') {
             this.lightstrip.brightness += 2.55
         } else if (action.name === 'decrease-brightness') {
@@ -92,6 +99,7 @@ export default class Thermostat extends EventEmitter {
         this.currentTemperature = this.minTemperature + (this.maxTemperature - this.minTemperature) / 2;
         this.desiredTemperature = this.currentTemperature;
         this.state = State.Sleeping;
+        this.emit('change')
     }
 
 }
