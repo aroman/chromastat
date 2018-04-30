@@ -1,10 +1,20 @@
+// Normal brightness values
 export enum Brightness {
     OFF = 0,
-    LOW = 255 * 0.05,
-    NORMAL = 255 * 0.10,
-    HIGH = 255 * 0.15,
+    LOW = 12,
+    NORMAL = 25,
+    HIGH = 38,
     MAX = 255,
 }
+
+// Brightness values suitable for camera recording
+// export enum Brightness {
+//     OFF = 0,
+//     LOW = 3,
+//     NORMAL = 5,
+//     HIGH = 38,
+//     MAX = 255,
+// }
 
 export enum State {
     Sleeping = 'Sleeping',

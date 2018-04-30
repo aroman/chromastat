@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import _ from "lodash";
 import leftPad from 'left-pad';
 import { PixelColor, Brightness } from "./types";
-import { bgBlue, bgMagenta, bgGreen, bgYellow, bgRed, bgBlack } from 'colors/safe';
+import { bgBlue, bgMagenta, bgWhite, bgGreen, bgYellow, bgRed, bgBlack } from 'colors/safe';
 
 const ws281x = require('rpi-ws281x-native');
 
@@ -13,6 +13,7 @@ export function pixelColorToString(pixelColor: PixelColor) {
         case PixelColor.Orange: return bgMagenta(' ')
         case PixelColor.Green: return bgGreen(' ')
         case PixelColor.Yellow: return bgYellow(' ')
+        case PixelColor.White: return bgWhite(' ')
         case PixelColor.Red: return bgRed(' ')
     }
 }
@@ -66,14 +67,18 @@ export default class Lightstrip extends EventEmitter {
         this.render();
     }
 
-    set pixels(pixels: PixelColor[]) {
+    public silentlySetPixels(pixels: PixelColor[]) {
         for (let i = 0; i < this.numLights; i++) {
             this.pixelData[i] = i < pixels.length ? pixels[i] : PixelColor.Off;
         }
+    }
+
+    set pixels(pixels: PixelColor[]) {
+        this.silentlySetPixels(pixels)
         this.render();
     }
 
-    private render() {
+    public render() {
         if (this.numLights !== this.pixelData.length) {
             console.error('[Lightstrip] malformed pixel data')
         }
