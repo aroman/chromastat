@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import logUpdate from 'log-update'
 import * as readline from 'readline';
 import { bold, rainbow, underline } from 'colors/safe';
 import { Action, State, PixelColor } from './types';
@@ -76,27 +77,14 @@ process.stdin.on('keypress', (str, key) => {
     if (action) {
         thermostat.performAction(action);
     } else {
-        redraw()
         process.stdout.write(`\nUnknown keypress: ${key.name}`)
     }
 });
 
 thermostat.on('render', () => {
-    redraw()
+    logUpdate(String(thermostat))
 })
 
-function redraw() {
-    // clear screen
-    process.stdout.write('\x1B[2J\x1B[0f');
-
-    // visualize thermostat state
-    // console.log()
-    console.log(String(thermostat));
-}
-
-redraw();
-
-// display help/instructions
 console.log(underline(rainbow('Chromastat 1.0')))
 actions.forEach(({ keyName, description }) => {
     console.log(`Press ${bold(keyName)} to ${bold(description)}`);

@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -6,10 +9,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+const log_update_1 = __importDefault(require("log-update"));
 const readline = __importStar(require("readline"));
 const safe_1 = require("colors/safe");
 const Thermostat_1 = __importDefault(require("./Thermostat"));
@@ -82,22 +83,12 @@ process.stdin.on('keypress', (str, key) => {
         thermostat.performAction(action);
     }
     else {
-        redraw();
         process.stdout.write(`\nUnknown keypress: ${key.name}`);
     }
 });
 thermostat.on('render', () => {
-    redraw();
+    log_update_1.default(String(thermostat));
 });
-function redraw() {
-    // clear screen
-    process.stdout.write('\x1B[2J\x1B[0f');
-    // visualize thermostat state
-    // console.log()
-    console.log(String(thermostat));
-}
-redraw();
-// display help/instructions
 console.log(safe_1.underline(safe_1.rainbow('Chromastat 1.0')));
 actions.forEach(({ keyName, description }) => {
     console.log(`Press ${safe_1.bold(keyName)} to ${safe_1.bold(description)}`);
