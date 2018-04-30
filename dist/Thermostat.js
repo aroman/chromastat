@@ -116,10 +116,10 @@ class Thermostat extends events_1.EventEmitter {
         this.lightstrip.render();
     }
     chartColorForIndex(index) {
-        if (index + this.minTemperature === this.currentTemperature) {
+        if (index + this.minTemperature === this.currentTemperature && this.state === types_1.State.Adjusting) {
             return types_1.PixelColor.White;
         }
-        if (index < this.lightstrip.numLights * 1 / 4) {
+        else if (index < this.lightstrip.numLights * 1 / 4) {
             return types_1.PixelColor.Blue;
         }
         else if (index < this.lightstrip.numLights * 2 / 4) {
@@ -136,9 +136,6 @@ class Thermostat extends events_1.EventEmitter {
         const pixels = lodash_1.default.times(this.lightstrip.numLights + 1, index => {
             const indexTemperature = this.minTemperature + index;
             if (this.state === types_1.State.Adjusting) {
-                if (indexTemperature === this.currentTemperature) {
-                    return types_1.PixelColor.White;
-                }
                 // Increasing towards the desired temperature
                 if (this.desiredTemperature > this.currentTemperature) {
                     // Adjustment zone

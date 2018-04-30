@@ -129,10 +129,10 @@ export default class Thermostat extends EventEmitter {
     }
 
     private chartColorForIndex(index: number): PixelColor {
-        if (index + this.minTemperature === this.currentTemperature) {
+        if (index + this.minTemperature === this.currentTemperature && this.state === State.Adjusting) {
             return PixelColor.White
         }
-        if (index < this.lightstrip.numLights * 1 / 4) {
+        else if (index < this.lightstrip.numLights * 1 / 4) {
             return PixelColor.Blue;
         }
         else if (index < this.lightstrip.numLights * 2 / 4) {
@@ -151,9 +151,6 @@ export default class Thermostat extends EventEmitter {
             const indexTemperature = this.minTemperature + index
 
             if (this.state === State.Adjusting) {
-                if (indexTemperature === this.currentTemperature) {
-                    return PixelColor.White
-                }
                 // Increasing towards the desired temperature
                 if (this.desiredTemperature > this.currentTemperature) {
                     // Adjustment zone
@@ -205,7 +202,6 @@ export default class Thermostat extends EventEmitter {
         this.lightstrip.brightness = Brightness.NORMAL
         this.resetAnimationTimer()
         this.emit('render')
-
     }
 
 }
