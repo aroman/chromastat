@@ -11,7 +11,7 @@ var Brightness;
 var State;
 (function (State) {
     State["Sleeping"] = "Sleeping";
-    State["Adjusted"] = "Adjusted";
+    State["Awake"] = "Awake";
     State["Adjusting"] = "Adjusting";
 })(State = exports.State || (exports.State = {}));
 var PixelColor;

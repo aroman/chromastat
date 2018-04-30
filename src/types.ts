@@ -8,7 +8,7 @@ export enum Brightness {
 
 export enum State {
     Sleeping = 'Sleeping',
-    Adjusted = 'Adjusted',
+    Awake = 'Awake',
     Adjusting = 'Adjusting',
 }
 

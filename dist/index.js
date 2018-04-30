@@ -93,7 +93,7 @@ function redraw() {
     // clear screen
     process.stdout.write('\x1B[2J\x1B[0f');
     // visualize thermostat state
-    console.log();
+    // console.log()
     console.log(String(thermostat));
 }
 redraw();
