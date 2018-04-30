@@ -23,7 +23,7 @@ export default class Thermostat extends EventEmitter {
         const numLights = this.maxTemperature - this.minTemperature
         this.lightstrip = new Lightstrip(numLights)
         this.reset();
-        this.lightstrip.on('change', () => this.emit('change'))
+        this.lightstrip.on('render', () => this.emit('render'))
     }
 
     get state() {
@@ -31,8 +31,11 @@ export default class Thermostat extends EventEmitter {
     }
 
     set state(state: State) {
+        if (this.state === state) {
+            return
+        }
         this._state = state
-        this.animationPixelOffset = 0
+        this.resetAnimationTimer()
         this.setLightPixels()
     }
 
@@ -41,8 +44,6 @@ export default class Thermostat extends EventEmitter {
     }
 
     public performAction(action: Action) {
-        // console.log(`performing action: ${action.description}`)
-
         if (action.name === 'reset') {
             this.reset()
             return
@@ -50,8 +51,6 @@ export default class Thermostat extends EventEmitter {
 
         if (action.name === 'sleep') {
             this.state = State.Sleeping
-            this.lightstrip.pixels = []
-            // this.lightstrip.brightness = Brightness.OFF
             return
         }
 
@@ -61,7 +60,6 @@ export default class Thermostat extends EventEmitter {
         }
 
         if (action.name === 'wake') {
-            // this.lightstrip.brightness = Brightness.NORMAL
             this.state = State.Awake
         }
         else if (action.name === 'increase-desired') {
@@ -160,15 +158,12 @@ export default class Thermostat extends EventEmitter {
                 if (this.desiredTemperature > this.currentTemperature) {
                     // Adjustment zone
                     if (indexTemperature > this.currentTemperature && indexTemperature <= this.desiredTemperature) {
-                        // console.log(`indexTemperature = ${indexTemperature} -> Green`)
                         return this.chartColorForIndex(index)
                         // Out of range
                     } else if (indexTemperature > this.desiredTemperature) {
-                        // console.log(`indexTemperature = ${indexTemperature} -> Off`)
                         return PixelColor.Off
                     }
                     else {
-                        // console.log(`indexTemperature = ${indexTemperature} -> ${this.chartColorForIndex(index)}`)
                         return this.chartColorForIndex(index)
                     }
                     // Decreasing towards the desired temperature
@@ -181,14 +176,6 @@ export default class Thermostat extends EventEmitter {
                         return PixelColor.Off
                     }
                 }
-                // // Still adjusting, but current == desired
-                // else {
-                //     if (indexTemperature <= this.currentTemperature) {
-                //         return this.chartColorForIndex(index)
-                //     } else {
-                //         return PixelColor.Off
-                //     }
-                // }
             }
 
             else if (this.state === State.Awake) {
@@ -205,16 +192,19 @@ export default class Thermostat extends EventEmitter {
         this.lightstrip.silentlySetPixels(pixels)
     }
 
-    private reset() {
-        this.currentTemperature = 65
-        // this.currentTemperature = this.maxTemperature;
-        this.desiredTemperature = this.currentTemperature;
-        this.state = State.Sleeping;
-        this.lightstrip.pixels = [];
-        this.lightstrip.brightness = Brightness.NORMAL
+    private resetAnimationTimer() {
         clearTimeout(this.animationTimer)
         this.animationTimer = setInterval(this.adjustingAnimationFrame.bind(this), this.animationDelay)
-        this.emit('change')
+        this.animationPixelOffset = 0
+    }
+
+    private reset() {
+        this.currentTemperature = 65
+        this.desiredTemperature = this.currentTemperature;
+        this.state = State.Sleeping;
+        this.lightstrip.brightness = Brightness.NORMAL
+        this.resetAnimationTimer()
+        this.emit('render')
 
     }
 

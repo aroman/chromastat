@@ -86,7 +86,7 @@ process.stdin.on('keypress', (str, key) => {
         process.stdout.write(`\nUnknown keypress: ${key.name}`);
     }
 });
-thermostat.on('change', () => {
+thermostat.on('render', () => {
     redraw();
 });
 function redraw() {

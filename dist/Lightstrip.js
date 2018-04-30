@@ -61,21 +61,18 @@ class Lightstrip extends events_1.EventEmitter {
         this.pixelData[index] = pixel;
         this.render();
     }
+    // Updates the pixel data, but doesn't actually update the strip
     silentlySetPixels(pixels) {
         for (let i = 0; i < this.numLights; i++) {
             this.pixelData[i] = i < pixels.length ? pixels[i] : types_1.PixelColor.Off;
         }
-    }
-    set pixels(pixels) {
-        this.silentlySetPixels(pixels);
-        this.render();
     }
     render() {
         if (this.numLights !== this.pixelData.length) {
             console.error('[Lightstrip] malformed pixel data');
         }
         ws281x.render(this.pixelData);
-        this.emit('change');
+        this.emit('render');
     }
 }
 exports.default = Lightstrip;

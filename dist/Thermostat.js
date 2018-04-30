@@ -17,29 +17,29 @@ class Thermostat extends events_1.EventEmitter {
         const numLights = this.maxTemperature - this.minTemperature;
         this.lightstrip = new Lightstrip_1.default(numLights);
         this.reset();
-        this.lightstrip.on('change', () => this.emit('change'));
+        this.lightstrip.on('render', () => this.emit('render'));
     }
     get state() {
         return this._state;
     }
     set state(state) {
+        if (this.state === state) {
+            return;
+        }
         this._state = state;
-        this.animationPixelOffset = 0;
+        this.resetAnimationTimer();
         this.setLightPixels();
     }
     toString() {
         return `Thermostat<${this.state}, temp = ${this.currentTemperature}, desiredTemp = ${this.desiredTemperature}>\n${this.lightstrip.toString()}`;
     }
     performAction(action) {
-        // console.log(`performing action: ${action.description}`)
         if (action.name === 'reset') {
             this.reset();
             return;
         }
         if (action.name === 'sleep') {
             this.state = types_1.State.Sleeping;
-            this.lightstrip.pixels = [];
-            // this.lightstrip.brightness = Brightness.OFF
             return;
         }
         if (action.name !== 'wake' && this.state === types_1.State.Sleeping) {
@@ -47,7 +47,6 @@ class Thermostat extends events_1.EventEmitter {
             return;
         }
         if (action.name === 'wake') {
-            // this.lightstrip.brightness = Brightness.NORMAL
             this.state = types_1.State.Awake;
         }
         else if (action.name === 'increase-desired') {
@@ -144,16 +143,13 @@ class Thermostat extends events_1.EventEmitter {
                 if (this.desiredTemperature > this.currentTemperature) {
                     // Adjustment zone
                     if (indexTemperature > this.currentTemperature && indexTemperature <= this.desiredTemperature) {
-                        // console.log(`indexTemperature = ${indexTemperature} -> Green`)
                         return this.chartColorForIndex(index);
                         // Out of range
                     }
                     else if (indexTemperature > this.desiredTemperature) {
-                        // console.log(`indexTemperature = ${indexTemperature} -> Off`)
                         return types_1.PixelColor.Off;
                     }
                     else {
-                        // console.log(`indexTemperature = ${indexTemperature} -> ${this.chartColorForIndex(index)}`)
                         return this.chartColorForIndex(index);
                     }
                     // Decreasing towards the desired temperature
@@ -169,14 +165,6 @@ class Thermostat extends events_1.EventEmitter {
                         return types_1.PixelColor.Off;
                     }
                 }
-                // // Still adjusting, but current == desired
-                // else {
-                //     if (indexTemperature <= this.currentTemperature) {
-                //         return this.chartColorForIndex(index)
-                //     } else {
-                //         return PixelColor.Off
-                //     }
-                // }
             }
             else if (this.state === types_1.State.Awake) {
                 if (indexTemperature <= this.currentTemperature) {
@@ -192,16 +180,18 @@ class Thermostat extends events_1.EventEmitter {
         });
         this.lightstrip.silentlySetPixels(pixels);
     }
-    reset() {
-        this.currentTemperature = 65;
-        // this.currentTemperature = this.maxTemperature;
-        this.desiredTemperature = this.currentTemperature;
-        this.state = types_1.State.Sleeping;
-        this.lightstrip.pixels = [];
-        this.lightstrip.brightness = types_1.Brightness.NORMAL;
+    resetAnimationTimer() {
         clearTimeout(this.animationTimer);
         this.animationTimer = setInterval(this.adjustingAnimationFrame.bind(this), this.animationDelay);
-        this.emit('change');
+        this.animationPixelOffset = 0;
+    }
+    reset() {
+        this.currentTemperature = 65;
+        this.desiredTemperature = this.currentTemperature;
+        this.state = types_1.State.Sleeping;
+        this.lightstrip.brightness = types_1.Brightness.NORMAL;
+        this.resetAnimationTimer();
+        this.emit('render');
     }
 }
 exports.default = Thermostat;

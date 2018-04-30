@@ -81,7 +81,7 @@ process.stdin.on('keypress', (str, key) => {
     }
 });
 
-thermostat.on('change', () => {
+thermostat.on('render', () => {
     redraw()
 })
 
