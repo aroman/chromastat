@@ -17,7 +17,7 @@ class Thermostat extends events_1.EventEmitter {
         const numLights = this.maxTemperature - this.minTemperature;
         this.lightstrip = new Lightstrip_1.default(numLights);
         this.reset();
-        this.lightstrip.on('render', () => this.emit('render'));
+        this.lightstrip.on("render", () => this.emit("render"));
     }
     get state() {
         return this._state;
@@ -34,45 +34,47 @@ class Thermostat extends events_1.EventEmitter {
         return `Thermostat<${this.state}, temp = ${this.currentTemperature}, desiredTemp = ${this.desiredTemperature}>\n${this.lightstrip.toString()}`;
     }
     performAction(action) {
-        if (action.name === 'reset') {
+        if (action.name === "reset") {
             this.reset();
             return;
         }
-        if (action.name === 'sleep') {
+        if (action.name === "sleep") {
+            this.lightstrip.brightness = 0;
             this.state = types_1.State.Sleeping;
             return;
         }
-        if (action.name !== 'wake' && this.state === types_1.State.Sleeping) {
-            console.log('thermostat is sleeping, you need to wake it up first!');
+        if (action.name !== "wake" && this.state === types_1.State.Sleeping) {
+            console.log("thermostat is sleeping, you need to wake it up first!");
             return;
         }
-        if (action.name === 'wake') {
+        if (action.name === "wake") {
+            this.lightstrip.brightness = types_1.Brightness.NORMAL;
             this.state = types_1.State.Awake;
         }
-        else if (action.name === 'increase-desired') {
+        else if (action.name === "increase-desired") {
             this.desiredTemperature = Math.min(this.maxTemperature, this.desiredTemperature + 1);
             this.state = types_1.State.Adjusting;
         }
-        else if (action.name === 'decrease-desired') {
+        else if (action.name === "decrease-desired") {
             this.desiredTemperature = Math.max(this.minTemperature, this.desiredTemperature - 1);
             this.state = types_1.State.Adjusting;
         }
-        else if (action.name === 'increase-current') {
+        else if (action.name === "increase-current") {
             this.currentTemperature = Math.min(this.maxTemperature, this.currentTemperature + 1);
         }
-        else if (action.name === 'decrease-current') {
+        else if (action.name === "decrease-current") {
             this.currentTemperature = Math.max(this.minTemperature, this.currentTemperature - 1);
         }
-        else if (action.name === 'increase-brightness') {
+        else if (action.name === "increase-brightness") {
             this.lightstrip.brightness += 1;
         }
-        else if (action.name === 'decrease-brightness') {
+        else if (action.name === "decrease-brightness") {
             this.lightstrip.brightness -= 1;
         }
-        else if (action.name === 'dim') {
+        else if (action.name === "dim") {
             this.lightstrip.brightness = types_1.Brightness.LOW;
         }
-        else if (action.name === 'confirm') {
+        else if (action.name === "confirm") {
             this.lightstrip.brightness = types_1.Brightness.LOW;
             setTimeout(() => {
                 this.lightstrip.brightness = types_1.Brightness.NORMAL;
@@ -91,7 +93,8 @@ class Thermostat extends events_1.EventEmitter {
     adjustingAnimationFrame() {
         // Only animate if we're awake (but not adjusting) and the current temperature
         // is different from the desired temperature
-        if (this.state !== types_1.State.Awake && this.currentTemperature !== this.desiredTemperature) {
+        if (this.state !== types_1.State.Awake &&
+            this.currentTemperature !== this.desiredTemperature) {
             return;
         }
         // Delta = how many degrees we are away from the desired temperature
@@ -108,7 +111,9 @@ class Thermostat extends events_1.EventEmitter {
             this.setLightPixels();
         }
         lodash_1.default.times(this.animationPixelOffset + 1, offset => {
-            const indexToAnimate = this.currentTemperature + Math.sign(delta) * offset - this.minTemperature;
+            const indexToAnimate = this.currentTemperature +
+                Math.sign(delta) * offset -
+                this.minTemperature;
             // Erase if delta < 0, draw if delta > 0
             this.lightstrip.setPixelColorAt(indexToAnimate, delta < 0 ? types_1.PixelColor.Off : this.chartColorForIndex(indexToAnimate));
             // console.log(`delta: ${delta}, indexToAnimate: ${indexToAnimate}`)
@@ -116,8 +121,9 @@ class Thermostat extends events_1.EventEmitter {
         this.lightstrip.render();
     }
     chartColorForIndex(index) {
-        if (index + this.minTemperature === this.currentTemperature && this.state === types_1.State.Adjusting) {
-            return types_1.PixelColor.White;
+        if (index + this.minTemperature === this.currentTemperature &&
+            this.state === types_1.State.Adjusting) {
+            return types_1.PixelColor.Green;
         }
         else if (index < this.lightstrip.numLights * 1 / 4) {
             return types_1.PixelColor.Blue;
@@ -139,7 +145,8 @@ class Thermostat extends events_1.EventEmitter {
                 // Increasing towards the desired temperature
                 if (this.desiredTemperature > this.currentTemperature) {
                     // Adjustment zone
-                    if (indexTemperature > this.currentTemperature && indexTemperature <= this.desiredTemperature) {
+                    if (indexTemperature > this.currentTemperature &&
+                        indexTemperature <= this.desiredTemperature) {
                         return this.chartColorForIndex(index);
                         // Out of range
                     }
@@ -152,7 +159,8 @@ class Thermostat extends events_1.EventEmitter {
                     // Decreasing towards the desired temperature
                 }
                 else if (this.desiredTemperature <= this.currentTemperature) {
-                    if (indexTemperature < this.currentTemperature && indexTemperature >= this.desiredTemperature) {
+                    if (indexTemperature < this.currentTemperature &&
+                        indexTemperature >= this.desiredTemperature) {
                         return types_1.PixelColor.Off;
                     }
                     else if (indexTemperature <= this.currentTemperature) {
@@ -188,7 +196,7 @@ class Thermostat extends events_1.EventEmitter {
         this.state = types_1.State.Sleeping;
         this.lightstrip.brightness = types_1.Brightness.NORMAL;
         this.resetAnimationTimer();
-        this.emit('render');
+        this.emit("render");
     }
 }
 exports.default = Thermostat;
